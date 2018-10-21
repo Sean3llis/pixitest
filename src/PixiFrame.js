@@ -1,73 +1,53 @@
 import React, { Component } from 'react';
-import PixiClient, { FILE_UPLOADED } from './PixiClient';
+import styled from 'styled-components';
+import PixiClient from './PixiClient';
+
+const CanvasRoot = styled.div`
+  width: 100%;
+  height: 100%;
+`;
+
 
 export default class PixiFrame extends Component {
-  componentDidMount() {
-    const PIXI = this.PIXI = window.PIXI;
-    this.pixi = new PIXI.Application({ width: 512, height: 512 });
-    this.pixiClient = PixiClient.getInstance();
-    this.bindEvents();
-    this.renderCanvas();
+  state = {
+    w: null,
+    h: null,
+    redraw: false
   }
 
-  bindEvents = () => {
-    this.pixiClient.on(FILE_UPLOADED, this.handleFileUploaded)
-  }
-
-  handleFileUploaded = (files) => {
-    // const filename = files[0].name;
-    // const imageObject = new Image(files[0]);
-    // console.log('imageObject ~~>', imageObject);
-    const PIXI = this.PIXI;
-    const pixi = this.pixi;
-    const reader = new FileReader();
-    reader.onload = function () {
-      const dataURL = reader.result;
-      console.log('dataURL ~~>', dataURL);
-      const image = new Image();
-      image.src = dataURL;
-      image.onload = () => {
-        const base = new PIXI.BaseTexture(image);
-        const texture = new PIXI.Texture(base);
-        const sprite = new PIXI.Sprite(texture);
-        pixi.stage.addChild(sprite);
-
+  componentDidUpdate = (prevProps, prevState) => {
+    if (!prevState.redraw && this.state.redraw) {
+      this.h = this.state.h;
+      this.w = this.state.w
+      this.setState({ redraw: false });
+      if (this.pixiClient) {
+        this.pixiClient.resize();
+      } else {
+        console.log('this.state ~~>', this.state);
+        this.pixiClient = PixiClient.getInstance(this.state.w, this.state.h);
+        this.renderCanvas();
       }
-      console.log('image ~~>', image);
-      // const output = document.getElementById('output');
-      // output.src = dataURL;
-    };
-    reader.readAsDataURL(files[0]);
-    // let base = new PIXI.BaseTexture(anyImageObject),
-
-    // this.PIXI.loader.add('cat.png').load(() => {
-    //   let texture = this.PIXI.loader.resources['cat.png'].texture
-    //   let sprite = new this.PIXI.Sprite(texture);
-    //   console.log('sprite ~~>', sprite);
-    //   console.log('this.pixi ~~>', this.pixi);
-    //   this.pixi.stage.addChild(sprite)
-    //   sprite.x = 0
-    //   sprite.y = 0
-      // const resource = upload.resources[filename];
-      // this.addSprite(resource)
-    // })
+    }
   }
 
-  addSprite(resource) {
-    const sprite = new this.PIXI.Sprite( resource.texture );
-    console.log('sprite ~~>', sprite);
-    this.pixi.stage.addChild(sprite);
-    sprite.x = 0;
-    sprite.y = 0;
-    console.log('this.pixi.stage ~~>', this.pixi.stage);
+  setupRoot = (el) => {
+    if (!el) return;
+    this.rootRef = el;
+    console.log('el.offsetWidth ~~>', el.offsetWidth);
+    this.setState({
+      w: el.offsetWidth,
+      h: el.offsetHeight,
+      redraw: true
+    });
   }
 
   renderCanvas = () => {
     const canvasRoot = document.getElementById('canvas-root');
-    canvasRoot.append(this.pixi.view);
+    canvasRoot.append(this.pixiClient.pixi.view);
   }
 
   render = () => {
-    return <div id="canvas-root"></div>
+
+    return <CanvasRoot ref={this.setupRoot} id="canvas-root" />
   }
 }

@@ -29,6 +29,10 @@ const BottomFrame = styled.div`
   background-color: ${colors.gray200};
   border-top: 1px solid ${colors.gray100};
 `;
+const FileInput = styled.input`
+  position: absolute;
+  left: 0px;
+`;
 
 class App extends Component {
   handleUpload = (e) => {
@@ -39,7 +43,6 @@ class App extends Component {
       const file = files[i];
       output.push(file);
     }
-
     pixiclient.emit(FILE_UPLOADED, files)
   }
   render() {
@@ -49,7 +52,7 @@ class App extends Component {
           asdf
         </TopFrame>
         <MainFrame>
-          <input type="file" name="upload" id="upload" multiple onChange={this.handleUpload.bind(this)} />
+          <FileInput type="file" name="upload" id="upload" multiple onChange={this.handleUpload.bind(this)} />
           <PixiFrame />
         </MainFrame>
         <BottomFrame>
