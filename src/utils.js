@@ -1,13 +1,3 @@
-export function makeDraggable(sprite) {
-  sprite.interactive = true;
-  sprite.buttonMode = true;
-  sprite.on('pointerdown', onDragStart)
-    .on('pointerup', onDragEnd)
-    .on('pointerupoutside', onDragEnd)
-    .on('pointermove', onDragMove);
-  return sprite;
-}
-
 export function fitSprite(sprite, w, h) {
   if (w > h) {
     if (sprite.height < h) {
@@ -24,6 +14,17 @@ export function fitSprite(sprite, w, h) {
   }
   sprite.anchor.set(0.5);
   sprite.position.set(w / 2, h / 2);
+}
+
+
+export function makeDraggable(sprite) {
+  sprite.interactive = true;
+  sprite.buttonMode = true;
+  sprite.on('pointerdown', onDragStart)
+    .on('pointerup', onDragEnd)
+    .on('pointerupoutside', onDragEnd)
+    .on('pointermove', onDragMove);
+  return sprite;
 }
 
 function onDragStart(event) {

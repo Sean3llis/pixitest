@@ -15,8 +15,13 @@ export function addLayer(displayObject) {
 const layersReducer = (state = INITIAL_STATE, action) => {
 
   switch (action.type) {
-    case 'SET_VISIBILITY_FILTER':
-      return action.filter
+    case ADD_LAYER: {
+      return {
+        ...state,
+        stack: [...state.stack, action.payload.displayObject]
+      }
+    }
+      
     default:
       return state
   }

@@ -2,6 +2,7 @@ import { EventEmitter } from "eventemitter3";
 import { makeDraggable, fitSprite } from "./utils";
 
 export const FILE_UPLOADED = 'FILE_UPLOADED';
+export const SPRITE_ADDED = 'SPRITE_ADDED'
 
 export default class PixiClient extends EventEmitter {
   constructor(w, h) {
@@ -20,7 +21,7 @@ export default class PixiClient extends EventEmitter {
   }
 
   bindEvents = () => {
-    this.on(FILE_UPLOADED, this.handleFileUploaded)
+    this.on(FILE_UPLOADED, this.handleFileUploaded);
     window.addEventListener('resize', this.resize);
   }
 
@@ -31,7 +32,7 @@ export default class PixiClient extends EventEmitter {
     }
   }
 
-  resize = () => {
+  resize = (w, h) => {
     const pixi = this.pixi;
     const parent = pixi.view.parentNode;
     this.w = parent.clientWidth;
@@ -51,8 +52,8 @@ export default class PixiClient extends EventEmitter {
         const texture = new PIXI.Texture(base);
         const sprite = new PIXI.Sprite(texture);
         makeDraggable(sprite);
-
         this.placeSprite(sprite);
+        this.emit(SPRITE_ADDED, sprite);
       }
     };
     reader.readAsDataURL(file);
@@ -60,6 +61,7 @@ export default class PixiClient extends EventEmitter {
 
   placeSprite = (sprite) => {
     const pixi = this.pixi;
+    console.log('this.w ~~>', this.w);
     fitSprite(sprite, this.w, this.h);
     pixi.stage.addChild(sprite);
   }

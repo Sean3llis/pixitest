@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import PixiClient from './PixiClient';
+import { connect } from 'react-redux';
+import PixiClient, { SPRITE_ADDED } from './PixiClient';
+import { addLayer } from './reducers/layers';
 
 const CanvasRoot = styled.div`
   width: 100%;
@@ -8,13 +10,7 @@ const CanvasRoot = styled.div`
 `;
 
 
-export default class PixiFrame extends Component {
-  state = {
-    w: null,
-    h: null,
-    redraw: false
-  }
-
+class PixiFrame extends Component {
   componentDidUpdate = (prevProps, prevState) => {
     if (!prevState.redraw && this.state.redraw) {
       this.h = this.state.h;
@@ -23,7 +19,7 @@ export default class PixiFrame extends Component {
       if (this.pixiClient) {
         this.pixiClient.resize();
       } else {
-        this.pixiClient = PixiClient.getInstance(this.state.w, this.state.h);
+        this.pixiClient = new PixiClient(this.state.w, this.state.h);
         this.renderCanvas();
       }
     }
@@ -32,20 +28,37 @@ export default class PixiFrame extends Component {
   setupRoot = (el) => {
     if (!el) return;
     this.rootRef = el;
-    this.setState({
-      w: el.offsetWidth,
-      h: el.offsetHeight,
-      redraw: true
+    this.initializePixiClient(el.offsetWidth, el.offsetHeight);
+  }
+
+  initializePixiClient = (w, h) => {
+    this.pixiClient = PixiClient.getInstance(w, h);
+    const canvasRoot = document.getElementById('canvas-root');
+    canvasRoot.append(this.pixiClient.pixi.view);
+    this.bindEvents();
+  }
+
+  bindEvents = () => {
+    const pixiClient = this.pixiClient;
+    const { addLayer } = this.props;
+    pixiClient.on(SPRITE_ADDED, sprite => {
+      addLayer(sprite);
     });
   }
 
-  renderCanvas = () => {
-    const canvasRoot = document.getElementById('canvas-root');
-    canvasRoot.append(this.pixiClient.pixi.view);
-  }
-
   render = () => {
-
     return <CanvasRoot ref={this.setupRoot} id="canvas-root" />
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    lol: 'what'
+  }
+}
+
+const mapDispatchToProps = {
+  addLayer
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PixiFrame);

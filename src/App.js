@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 import { colors } from './styled';
+import { addLayer } from './reducers/layers';
 import PixiFrame from './PixiFrame';
 import PixiClient, { FILE_UPLOADED } from './PixiClient';
 import './App.css';
@@ -37,15 +39,16 @@ const FileInput = styled.input`
 class App extends Component {
   handleUpload = (e) => {
     const output = [];
-    const pixiclient = PixiClient.getInstance();
+    const pixiClient = PixiClient.getInstance();
     const files = e.target.files;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       output.push(file);
     }
-    pixiclient.emit(FILE_UPLOADED, files)
+    pixiClient.emit(FILE_UPLOADED, files)
   }
   render() {
+    console.log('this.props ~~>', this.props);
     return (
       <VerticalFrame>
         <TopFrame>
@@ -63,4 +66,14 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    lol: 'what'
+  }
+}
+
+const mapDispatchToProps = {
+  addLayer
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
