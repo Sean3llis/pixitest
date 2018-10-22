@@ -23,7 +23,6 @@ export default class PixiFrame extends Component {
       if (this.pixiClient) {
         this.pixiClient.resize();
       } else {
-        console.log('this.state ~~>', this.state);
         this.pixiClient = PixiClient.getInstance(this.state.w, this.state.h);
         this.renderCanvas();
       }
@@ -33,7 +32,6 @@ export default class PixiFrame extends Component {
   setupRoot = (el) => {
     if (!el) return;
     this.rootRef = el;
-    console.log('el.offsetWidth ~~>', el.offsetWidth);
     this.setState({
       w: el.offsetWidth,
       h: el.offsetHeight,
