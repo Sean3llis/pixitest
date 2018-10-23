@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { colors } from './styled';
 import { addLayer } from './reducers/layers';
 import PixiFrame from './PixiFrame';
-import PixiClient, { FILE_UPLOADED } from './PixiClient';
+import PixiClient, { FILE_UPLOADED, ZOOM } from './PixiClient';
 import './App.css';
 
 const VerticalFrame = styled.div`
@@ -13,7 +13,7 @@ const VerticalFrame = styled.div`
   height: 100vh;
 `;
 const TopFrame = styled.div`
-  height: 5vh;
+  height: 2rem;
   background-color: ${colors.gray200};
   border-bottom: 1px solid ${colors.gray100};
 `;
@@ -27,7 +27,7 @@ const MainFrame = styled.div`
   background-color: ${colors.gray300};
 `;
 const BottomFrame = styled.div`
-  height: 20vh;
+  height: 4rem;
   background-color: ${colors.gray200};
   border-top: 1px solid ${colors.gray100};
 `;
@@ -47,12 +47,19 @@ class App extends Component {
     }
     pixiClient.emit(FILE_UPLOADED, files)
   }
+
+  onZoom = () => {
+    const pixiClient = PixiClient.getInstance();
+    console.log('this.props ~~>', this.props);
+    pixiClient.emit(ZOOM)
+  }
+
   render() {
     console.log('this.props ~~>', this.props);
     return (
       <VerticalFrame>
         <TopFrame>
-          asdf
+          <div onClick={this.onZoom}>ZOOM</div>
         </TopFrame>
         <MainFrame>
           <FileInput type="file" name="upload" id="upload" multiple onChange={this.handleUpload.bind(this)} />

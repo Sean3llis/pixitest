@@ -1,8 +1,10 @@
+import Viewport from 'pixi-viewport';
 import { EventEmitter } from "eventemitter3";
 import { makeDraggable, fitSprite } from "./utils";
 
 export const FILE_UPLOADED = 'FILE_UPLOADED';
 export const SPRITE_ADDED = 'SPRITE_ADDED'
+export const ZOOM = 'ZOOM'
 
 export default class PixiClient extends EventEmitter {
   constructor(w, h) {
@@ -14,15 +16,46 @@ export default class PixiClient extends EventEmitter {
     this.h = h;
     this.masterLoop = this.pixi.ticker.add(this.masterLoop);
     this.bindEvents();
+    this.initViewport();
   }
 
   masterLoop = (delta) => {
     // tick tick tick
   }
 
+  initViewport = () => {
+    const { PIXI, pixi } = this;
+    const viewport = this.viewport = new Viewport({
+      screenWidth: this.w,
+      screenHeight: this.h,
+      worldWidth: 1000,
+      worldHeight: 1000,
+      drag: false,
+
+      interaction: pixi.renderer.interaction // the interaction module is important for wheel() to work properly when renderer.view is placed or scaled
+    });
+    viewport
+      .drag()
+      .pinch()
+      .wheel()
+      .decelerate();
+    pixi.stage.addChild(viewport);
+    var sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+    sprite.tint = 0xff0000;
+    sprite.width = sprite.height = 100
+    sprite.position.set(100, 100);
+  }
+
   bindEvents = () => {
     this.on(FILE_UPLOADED, this.handleFileUploaded);
+    this.on(ZOOM, this.handleZoom);
     window.addEventListener('resize', this.resize);
+  }
+
+  handleZoom = () => {
+    const { viewport } = this;
+    console.log('viewport ~~>', viewport);
+    viewport.zoomTo(0.5, 0.5)
   }
 
   handleFileUploaded = (files) => {
@@ -60,10 +93,10 @@ export default class PixiClient extends EventEmitter {
   }
 
   placeSprite = (sprite) => {
-    const pixi = this.pixi;
+    const { viewport } = this;
     console.log('this.w ~~>', this.w);
     fitSprite(sprite, this.w, this.h);
-    pixi.stage.addChild(sprite);
+    viewport.addChild(sprite);
   }
 
   static getInstance(w, h) {
