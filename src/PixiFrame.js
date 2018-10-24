@@ -1,28 +1,25 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import PixiClient, { SPRITE_ADDED } from './PixiClient';
-import { addLayer } from './reducers/layers';
+import PixiClient, { SPRITE_ADDED, SPACE_CHANGED } from './PixiClient';
+import { addLayer, setSpaceDown } from './reducers/layers';
 
 const CanvasRoot = styled.div`
   width: 100%;
   height: 100%;
+  cursor: ${({ mouseDown, spaceDown}) => {
+    if (spaceDown) {
+      return mouseDown ? 'grabbing' : 'grab'
+    } else {
+      return 'inherit';
+    }
+  }};
 `;
 
 
 class PixiFrame extends Component {
-  componentDidUpdate = (prevProps, prevState) => {
-    if (!prevState.redraw && this.state.redraw) {
-      this.h = this.state.h;
-      this.w = this.state.w
-      this.setState({ redraw: false });
-      if (this.pixiClient) {
-        this.pixiClient.resize();
-      } else {
-        this.pixiClient = new PixiClient(this.state.w, this.state.h);
-        this.renderCanvas();
-      }
-    }
+  state = {
+    mouseDown: false
   }
 
   setupRoot = (el) => {
@@ -40,25 +37,39 @@ class PixiFrame extends Component {
 
   bindEvents = () => {
     const pixiClient = this.pixiClient;
-    const { addLayer } = this.props;
+    const { addLayer, setSpaceDown } = this.props;
     pixiClient.on(SPRITE_ADDED, sprite => {
       addLayer(sprite);
     });
+    pixiClient.on(SPACE_CHANGED, setSpaceDown)
   }
 
+  handleMouseDown = () => this.setState({ mouseDown: true });
+  handleMouseUp = () => this.setState({ mouseDown: false });
+
   render = () => {
-    return <CanvasRoot ref={this.setupRoot} id="canvas-root" />
+    const { spaceDown } = this.props;
+    const { mouseDown } = this.state;
+    return (
+      <CanvasRoot
+        onMouseDown={this.handleMouseDown}
+        onMouseUp={this.handleMouseUp}
+        mouseDown={mouseDown} 
+        spaceDown={spaceDown}
+        ref={this.setupRoot} id="canvas-root" />
+    );
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = ({ layers }) => {
   return {
-    lol: 'what'
+    spaceDown: layers.spaceDown
   }
 }
 
 const mapDispatchToProps = {
-  addLayer
+  addLayer,
+  setSpaceDown
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PixiFrame);

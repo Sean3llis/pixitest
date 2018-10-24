@@ -1,5 +1,6 @@
 const INITIAL_STATE = {
-  stack: []
+  stack: [],
+  spaceDown: false
 };
 
 export const ADD_LAYER = 'ADD_LAYER';
@@ -12,6 +13,16 @@ export function addLayer(displayObject) {
   }
 }
 
+export const SET_SPACE_DOWN = 'SET_SPACE_DOWN';
+export function setSpaceDown(spaceDown) {
+  return {
+    type: SET_SPACE_DOWN,
+    payload: {
+      spaceDown
+    }
+  }
+}
+
 const layersReducer = (state = INITIAL_STATE, action) => {
 
   switch (action.type) {
@@ -19,6 +30,14 @@ const layersReducer = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         stack: [...state.stack, action.payload.displayObject]
+      }
+    }
+
+    case SET_SPACE_DOWN: {
+      const { spaceDown } = action.payload;
+      return {
+        ...state,
+        spaceDown
       }
     }
       

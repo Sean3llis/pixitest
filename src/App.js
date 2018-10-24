@@ -26,6 +26,7 @@ const MainFrame = styled.div`
   align-items: center;
   background-color: ${colors.gray300};
 `;
+
 const BottomFrame = styled.div`
   height: 4rem;
   background-color: ${colors.gray200};

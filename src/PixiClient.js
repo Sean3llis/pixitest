@@ -1,22 +1,29 @@
 import Viewport from 'pixi-viewport';
 import { EventEmitter } from "eventemitter3";
 import { makeDraggable, fitSprite } from "./utils";
+import Mousetrap from 'mousetrap';
 
 export const FILE_UPLOADED = 'FILE_UPLOADED';
 export const SPRITE_ADDED = 'SPRITE_ADDED'
 export const ZOOM = 'ZOOM'
+export const SPACE_CHANGED = 'SPACE_CHANGED'
+
+// viewport plugins
+const DRAG = 'drag';
 
 export default class PixiClient extends EventEmitter {
   constructor(w, h) {
     super();
     const PIXI = this.PIXI = window.PIXI;
-    this.pixi = new PIXI.Application({ width: w, height: h });
+    this.pixi = new PIXI.Application({ width: w, height: h, backgroundColor: 0x1099bb });
     window.p = this.pixi;
     this.w = w;
     this.h = h;
     this.masterLoop = this.pixi.ticker.add(this.masterLoop);
     this.bindEvents();
+    this.bindKeys();
     this.initViewport();
+    this.spaceDown = false;
   }
 
   masterLoop = (delta) => {
@@ -30,16 +37,15 @@ export default class PixiClient extends EventEmitter {
       screenHeight: this.h,
       worldWidth: 1000,
       worldHeight: 1000,
-      drag: false,
-
       interaction: pixi.renderer.interaction // the interaction module is important for wheel() to work properly when renderer.view is placed or scaled
     });
     viewport
       .drag()
       .pinch()
-      .wheel()
       .decelerate();
+    viewport.pausePlugin(DRAG);
     pixi.stage.addChild(viewport);
+    window.viewport = viewport;
     var sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
     sprite.tint = 0xff0000;
     sprite.width = sprite.height = 100
@@ -49,12 +55,38 @@ export default class PixiClient extends EventEmitter {
   bindEvents = () => {
     this.on(FILE_UPLOADED, this.handleFileUploaded);
     this.on(ZOOM, this.handleZoom);
+    this.on(SPACE_CHANGED, spaceDown => {
+      if (spaceDown !== this.spaceDown) {
+        this.handleSpaceChanged(spaceDown);
+        this.spaceDown = spaceDown;
+      }
+    })
     window.addEventListener('resize', this.resize);
+  }
+
+  bindKeys = () => {
+    const M = Mousetrap;
+    M.bind('space', () => {
+      if (!this.spaceDown) {
+        this.emit(SPACE_CHANGED, true);
+        this.spaceDown = true;
+      }
+    });
+    M.bind('space', () => {
+      if (this.spaceDown) {
+        this.emit(SPACE_CHANGED, false)
+        this.spaceDown = false;
+      }
+    }, 'keyup');
+  }
+
+  handleSpaceChanged = (spaceDown) => {
+    const { viewport } = this;
+    spaceDown ? viewport.resumePlugin(DRAG) : viewport.pausePlugin(DRAG);
   }
 
   handleZoom = () => {
     const { viewport } = this;
-    console.log('viewport ~~>', viewport);
     viewport.zoomTo(0.5, 0.5)
   }
 
@@ -94,7 +126,6 @@ export default class PixiClient extends EventEmitter {
 
   placeSprite = (sprite) => {
     const { viewport } = this;
-    console.log('this.w ~~>', this.w);
     fitSprite(sprite, this.w, this.h);
     viewport.addChild(sprite);
   }
