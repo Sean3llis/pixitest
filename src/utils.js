@@ -43,10 +43,10 @@ function onDragEnd() {
   this.data = null;
 }
 
-function onDragMove() {
+function onDragMove(e) {
   if (this.dragging) {
-    var newPosition = this.data.getLocalPosition(this.parent);
-    this.x = newPosition.x;
-    this.y = newPosition.y;
+    // var newPosition = this.data.getLocalPosition(this.parent);
+    this.x += e.data.originalEvent.movementX;//here
+    this.y += e.data.originalEvent.movementY;//and here
   }
 }
