@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { colors } from './styled';
 import { addLayer } from './reducers/layers';
 import PixiFrame from './PixiFrame';
+import Toolbar from './Toolbar';
 import PixiClient, { FILE_UPLOADED, ZOOM } from './PixiClient';
 import './App.css';
 
@@ -25,6 +26,7 @@ const MainFrame = styled.div`
   justify-content: center;
   align-items: center;
   background-color: ${colors.gray300};
+  position: relative;
 `;
 
 const BottomFrame = styled.div`
@@ -32,6 +34,7 @@ const BottomFrame = styled.div`
   background-color: ${colors.gray200};
   border-top: 1px solid ${colors.gray100};
 `;
+
 const FileInput = styled.input`
   position: absolute;
   left: 0px;
@@ -51,12 +54,10 @@ class App extends Component {
 
   onZoom = () => {
     const pixiClient = PixiClient.getInstance();
-    console.log('this.props ~~>', this.props);
     pixiClient.emit(ZOOM)
   }
 
   render() {
-    console.log('this.props ~~>', this.props);
     return (
       <VerticalFrame>
         <TopFrame>
@@ -65,6 +66,7 @@ class App extends Component {
         <MainFrame>
           <FileInput type="file" name="upload" id="upload" multiple onChange={this.handleUpload.bind(this)} />
           <PixiFrame />
+          <Toolbar />
         </MainFrame>
         <BottomFrame>
           alskdjf

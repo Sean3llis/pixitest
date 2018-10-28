@@ -7,3 +7,7 @@ export const colors = {
   gray200,
   gray300
 }
+
+export const unit = 8;
+
+export const border100 = `${1}px solid ${gray100}`;

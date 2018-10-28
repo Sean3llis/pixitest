@@ -2,6 +2,7 @@ import Viewport from 'pixi-viewport';
 import { EventEmitter } from "eventemitter3";
 import { makeDraggable, fitSprite } from "./utils";
 import Mousetrap from 'mousetrap';
+import ImageLayer from './image-layer';
 
 export const FILE_UPLOADED = 'FILE_UPLOADED';
 export const SPRITE_ADDED = 'SPRITE_ADDED'
@@ -85,15 +86,16 @@ export default class PixiClient extends EventEmitter {
     spaceDown ? viewport.resumePlugin(DRAG) : viewport.pausePlugin(DRAG);
   }
 
-  handleZoom = () => {
+  handleZoom = (value) => {
     const { viewport } = this;
-    viewport.zoomTo(0.5, 0.5)
+    viewport.zoom(value, true);
   }
 
   handleFileUploaded = (files) => {
+    const { pixi } = this;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      this.placeFile(file);
+      const layer = new ImageLayer(file, this);
     }
   }
 
@@ -103,25 +105,6 @@ export default class PixiClient extends EventEmitter {
     this.w = parent.clientWidth;
     this.h = parent.clientHeight;
     pixi.renderer.resize(parent.clientWidth, parent.clientHeight);
-  }
-  
-  placeFile = (file) => {
-    const PIXI = this.PIXI;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataURL = reader.result;
-      const image = new Image();
-      image.src = dataURL;
-      image.onload = () => {
-        const base = new PIXI.BaseTexture(image);
-        const texture = new PIXI.Texture(base);
-        const sprite = new PIXI.Sprite(texture);
-        makeDraggable(sprite);
-        this.placeSprite(sprite);
-        this.emit(SPRITE_ADDED, sprite);
-      }
-    };
-    reader.readAsDataURL(file);
   }
 
   placeSprite = (sprite) => {
