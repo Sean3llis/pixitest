@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { FiZoomIn, FiZoomOut, FiFilePlus } from 'react-icons/fi';
+import { FiZoomIn, FiZoomOut, FiFilePlus, FiLayers, FiType } from 'react-icons/fi';
 import { connect } from 'react-redux';
 import { colors, unit, border100 } from './styled';
 import PixiClient, { FILE_UPLOADED, ZOOM } from './PixiClient';
@@ -8,7 +8,7 @@ import PixiClient, { FILE_UPLOADED, ZOOM } from './PixiClient';
 
 const Container = styled.div`
   position: absolute;
-  right: ${unit * 2}px;
+  left: ${unit * 2}px;
   padding: ${unit / 2}px;
   top: ${unit * 2}px;
   background-color: ${colors.gray200};
@@ -19,11 +19,12 @@ const Tool = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding: ${unit / 2}px;
   align-items: center;
   width: ${unit * 3}px;
   height: ${unit * 3}px;
   border-bottom: ${border100};
-  color: black;
+  color: ${colors.white200};
   font-size: ${unit * 2}px;
   &:last-child {
     border-bottom: none;
@@ -33,22 +34,38 @@ const Tool = styled.div`
     cursor: pointer;
     &:after {
       opacity: 1;
+      transition: opacity 0.2s ease-in-out;
     }
   }
   &:after {
+    content: '${props => props.label}';
+    padding: ${unit}px;
+    pointer-events: none;
+    padding-right: ${unit * 2}px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    content: '${props => props.label}';
     position: absolute;
-    right: ${unit * 4}px;
+    left: ${unit * 4}px;
     white-space: nowrap;
-    padding: ${unit / 2}px;
     background-color: ${colors.gray300};
-    font-color: ${colors.gray200};
+    color: ${colors.white200};
     font-size: 12px;
     opacity: 0;
     pointer-events: none;
+  }
+`;
+
+const HiddenInput = styled.input`
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  pointer-events: none;
+`;
+
+const Label = styled.label`
+  &:hover {
+    cursor: pointer;
   }
 `;
 
@@ -61,12 +78,24 @@ class FileInput extends Component {
       const file = files[i];
       output.push(file);
     }
-    pixiClient.emit(FILE_UPLOADED, files)
+    pixiClient.emit(FILE_UPLOADED, files);
+    this.inputRef.value = '';
   }
+
+  setup = el => {
+    if (!el) return;
+    this.inputRef = el;
+  }
+
   render() {
     return (
-      <FileInput type="file" name="upload" id="upload" multiple onChange={this.handleUpload.bind(this)} />
-    )
+      <div>
+        <Label htmlFor="add-file">
+          <FiFilePlus />
+        </Label>
+        <HiddenInput ref={this.setup} type="file" id="add-file" multiple onChange={this.handleUpload.bind(this)} />
+      </div>
+    );
   }
 }
 
@@ -84,9 +113,11 @@ class Toolbar extends Component {
   render() {
     return (
       <Container>
-        <Tool label='Zoom In'><FiZoomIn onClick={() => this.handleZoom(-200)} /></Tool>
-        <Tool label='Zoom Out'><FiZoomOut onClick={() => this.handleZoom(200)} /></Tool>
-        <Tool label='Add File'><FiFilePlus /></Tool>
+        <Tool label='Zoom In' onClick={() => this.handleZoom(-200)}><FiZoomIn /></Tool>
+        <Tool label='Zoom Out' onClick={() => this.handleZoom(200)}><FiZoomOut /></Tool>
+        <Tool label='Add Text' onClick={() => this.handleZoom(200)}><FiType /></Tool>
+        <Tool label='Add File'><FileInput /></Tool>
+        <Tool label='Layers'><FiLayers /></Tool>
       </Container>
     );
   }

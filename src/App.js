@@ -5,6 +5,7 @@ import { colors } from './styled';
 import { addLayer } from './reducers/layers';
 import PixiFrame from './PixiFrame';
 import Toolbar from './Toolbar';
+import LayerPanel from './LayerPanel';
 import PixiClient, { FILE_UPLOADED, ZOOM } from './PixiClient';
 import './App.css';
 
@@ -17,6 +18,7 @@ const TopFrame = styled.div`
   height: 2rem;
   background-color: ${colors.gray200};
   border-bottom: 1px solid ${colors.gray100};
+  user-select: none;
 `;
 
 const MainFrame = styled.div`
@@ -33,11 +35,7 @@ const BottomFrame = styled.div`
   height: 4rem;
   background-color: ${colors.gray200};
   border-top: 1px solid ${colors.gray100};
-`;
-
-const FileInput = styled.input`
-  position: absolute;
-  left: 0px;
+  user-select: none;
 `;
 
 class App extends Component {
@@ -54,22 +52,22 @@ class App extends Component {
 
   onZoom = () => {
     const pixiClient = PixiClient.getInstance();
-    pixiClient.emit(ZOOM)
+    pixiClient.emit(ZOOM);
   }
 
   render() {
     return (
       <VerticalFrame>
         <TopFrame>
-          <div onClick={this.onZoom}>ZOOM</div>
+          __
         </TopFrame>
         <MainFrame>
-          <FileInput type="file" name="upload" id="upload" multiple onChange={this.handleUpload.bind(this)} />
           <PixiFrame />
           <Toolbar />
+          <LayerPanel />
         </MainFrame>
         <BottomFrame>
-          alskdjf
+          __
         </BottomFrame>
       </VerticalFrame>
     );

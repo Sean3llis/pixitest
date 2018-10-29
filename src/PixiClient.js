@@ -1,13 +1,12 @@
 import Viewport from 'pixi-viewport';
 import { EventEmitter } from "eventemitter3";
-import { makeDraggable, fitSprite } from "./utils";
 import Mousetrap from 'mousetrap';
 import ImageLayer from './image-layer';
 
 export const FILE_UPLOADED = 'FILE_UPLOADED';
-export const SPRITE_ADDED = 'SPRITE_ADDED'
-export const ZOOM = 'ZOOM'
-export const SPACE_CHANGED = 'SPACE_CHANGED'
+export const ZOOM = 'ZOOM';
+export const SPACE_CHANGED = 'SPACE_CHANGED';
+export const LAYER_ADDED = 'LAYER_ADDED';
 
 // viewport plugins
 const DRAG = 'drag';
@@ -16,14 +15,18 @@ export default class PixiClient extends EventEmitter {
   constructor(w, h) {
     super();
     const PIXI = this.PIXI = window.PIXI;
-    this.pixi = new PIXI.Application({ width: w, height: h, backgroundColor: 0x1099bb });
-    window.p = this.pixi;
+    this.pixi = new PIXI.Application({ width: w, height: h, backgroundColor: 'black' });
+    window.pixiClient = this;
+    console.log(this);
+    window.pixi = this.pixi;
     this.w = w;
     this.h = h;
     this.masterLoop = this.pixi.ticker.add(this.masterLoop);
+    this.layers = {};
     this.bindEvents();
     this.bindKeys();
     this.initViewport();
+    this.initGrid();
     this.spaceDown = false;
   }
 
@@ -36,14 +39,15 @@ export default class PixiClient extends EventEmitter {
     const viewport = this.viewport = new Viewport({
       screenWidth: this.w,
       screenHeight: this.h,
-      worldWidth: 1000,
-      worldHeight: 1000,
+      worldWidth: 100,
+      worldHeight: 100,
       interaction: pixi.renderer.interaction // the interaction module is important for wheel() to work properly when renderer.view is placed or scaled
     });
     viewport
       .drag()
       .pinch()
       .decelerate();
+    viewport.zOrder = 1;
     viewport.pausePlugin(DRAG);
     pixi.stage.addChild(viewport);
     window.viewport = viewport;
@@ -51,6 +55,16 @@ export default class PixiClient extends EventEmitter {
     sprite.tint = 0xff0000;
     sprite.width = sprite.height = 100
     sprite.position.set(100, 100);
+    sprite.zOrder = 2;
+  }
+
+  initGrid = () => {
+    const { PIXI } = this;
+    const texture = PIXI.Texture.fromImage('grid.png');
+    const tilingSprite = new PIXI.extras.TilingSprite(texture, 4000, 4000);
+    tilingSprite.position.set(-2000, -2000);
+    tilingSprite.zOrder = 1;
+    this.viewport.addChild(tilingSprite);
   }
 
   bindEvents = () => {
@@ -92,10 +106,11 @@ export default class PixiClient extends EventEmitter {
   }
 
   handleFileUploaded = (files) => {
-    const { pixi } = this;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const layer = new ImageLayer(file, this);
+      this.emit(LAYER_ADDED, layer);
+      this.layers[layer.id] = layer;
     }
   }
 
@@ -109,7 +124,6 @@ export default class PixiClient extends EventEmitter {
 
   placeSprite = (sprite) => {
     const { viewport } = this;
-    fitSprite(sprite, this.w, this.h);
     viewport.addChild(sprite);
   }
 

@@ -1,7 +1,22 @@
+import uniqid from 'uniqid';
+import { SPACE_CHANGED } from "./PixiClient";
+
 export default class ImageLayer {
   constructor(file, pixiClient) {
     this.pixiClient = pixiClient;
-    
+    this.bindEvents();
+    this.makeSprite(file);
+  }
+
+  bindEvents = () => {
+    const { pixiClient } = this;
+    pixiClient.on(SPACE_CHANGED, spaceDown => this.sprite.interactive = !spaceDown);
+  }
+
+  makeSprite = (file) => {
+    const { pixiClient } = this;
+    this.filename = file.name;
+    this.id = uniqid('image-');
     const PIXI = window.PIXI;
     const reader = new FileReader();
     reader.onload = () => {
@@ -13,17 +28,28 @@ export default class ImageLayer {
         const texture = new PIXI.Texture(base);
         const sprite = new PIXI.Sprite(texture);
         this.sprite = sprite;
+        window.sprite = sprite;
+        sprite.interactive = true;
+        sprite.buttonMode = true;
+        sprite.on('pointerdown', this.onDragStart)
+          .on('pointerdown', this.onClick)
+          .on('pointerup', this.onDragEnd)
+          .on('pointerupoutside', this.onDragEnd)
+          .on('pointermove', this.onDragMove);
         this.fitSprite(sprite, pixiClient.w, pixiClient.h);
         this.placeSprite(sprite);
-        // this.emit('SPRITE_ADDED', sprite);
       }
     };
     reader.readAsDataURL(file);
   }
 
+  onClick = () => {
+    console.log('click', this);
+
+  }
+
   placeSprite = (sprite) => {
     const { viewport } = this.pixiClient;
-    // fitSprite(sprite, this.w, this.h);
     viewport.addChild(sprite);
   }
 
@@ -50,7 +76,7 @@ export default class ImageLayer {
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
     this.data = event.data;
-    this.alpha = 0.5;
+    this.alpha = 0.7;
     this.dragging = true;
   }
 
@@ -68,4 +94,5 @@ export default class ImageLayer {
       this.y += e.data.originalEvent.movementY;//and here
     }
   }
+  
 }

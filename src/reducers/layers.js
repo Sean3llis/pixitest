@@ -4,11 +4,17 @@ const INITIAL_STATE = {
 };
 
 export const ADD_LAYER = 'ADD_LAYER';
-export function addLayer(displayObject) {
+export const IMAGE_LAYER = 'IMAGE_LAYER';
+export function addLayer(layer) {
+  console.log('layer ~~>', layer);
   return {
     type: ADD_LAYER,
     payload: {
-      displayObject
+      layer: {
+        type: IMAGE_LAYER,
+        name: layer.filename,
+        id: layer.id
+      }
     }
   }
 }
@@ -27,9 +33,10 @@ const layersReducer = (state = INITIAL_STATE, action) => {
 
   switch (action.type) {
     case ADD_LAYER: {
+      const { layer } = action.payload;
       return {
         ...state,
-        stack: [...state.stack, action.payload.displayObject]
+        stack: [layer, ...state.stack]
       }
     }
 

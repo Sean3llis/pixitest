@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import PixiClient, { SPRITE_ADDED, SPACE_CHANGED } from './PixiClient';
+import PixiClient, { SPACE_CHANGED, LAYER_ADDED } from './PixiClient';
 import { addLayer, setSpaceDown } from './reducers/layers';
 
 const CanvasRoot = styled.div`
@@ -38,10 +38,8 @@ class PixiFrame extends Component {
   bindEvents = () => {
     const pixiClient = this.pixiClient;
     const { addLayer, setSpaceDown } = this.props;
-    pixiClient.on(SPRITE_ADDED, sprite => {
-      addLayer(sprite);
-    });
     pixiClient.on(SPACE_CHANGED, setSpaceDown)
+    pixiClient.on(LAYER_ADDED, addLayer);
   }
 
   handleMouseDown = () => this.setState({ mouseDown: true });
