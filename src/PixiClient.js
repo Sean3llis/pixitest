@@ -15,7 +15,7 @@ export default class PixiClient extends EventEmitter {
   constructor(w, h) {
     super();
     const PIXI = this.PIXI = window.PIXI;
-    this.pixi = new PIXI.Application({ width: w, height: h, backgroundColor: 'black' });
+    this.pixi = new PIXI.Application({ width: w, height: h, backgroundColor: 'black', antialias: true });
     window.pixiClient = this;
     console.log(this);
     window.pixi = this.pixi;

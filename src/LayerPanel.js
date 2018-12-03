@@ -9,6 +9,7 @@ const Panel = styled.div`
   left: 0px;
   bottom: 0px;
   padding: ${unit}px;
+  user-select: none;
 `;
 
 const LayerRow = styled.div`
@@ -20,13 +21,17 @@ const LayerRow = styled.div`
   color: white;
 `;
 
+const RowName = styled.div`
+  overflow: hidden;
+  white-space: nowrap;
+`;
+
 class LayerPanel extends Component {
   renderLayerRow = (layer) => {
-    console.log('layer ~~>', layer);
     return (
       <LayerRow key={layer.id}>
         <FiImage />
-        {layer.name}
+        <RowName>{layer.name}</RowName>
       </LayerRow>
     )
   }
